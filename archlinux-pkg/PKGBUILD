@@ -1,0 +1,52 @@
+# https://bitbucket.org/SpartanJ/soil2/overview
+
+# NOTE: modified pkgbuild from AUR which also builds a shared lib. ugly but sorry..
+
+#pkgname=soil2-hg
+pkgname=libsoil2
+pkgver=17
+pkgrel=1
+pkgdesc="A tiny C lib primarily for uploading textures into OpenGL"
+arch=('i686' 'x86_64')
+url="https://bitbucket.org/SpartanJ/soil2"
+license=('CCPL')
+makedepends=('mercurial' 'mesa' 'premake')
+#source=("hg+https://bitbucket.org/SpartanJ/${pkgname%-*}"
+source=("https://bitbucket.org/SpartanJ/soil2/get/1da9aa74fba7.zip"
+        'premake4.lua')
+#sha256sums=('SKIP'
+sha256sums=('284272defa600a41524cfb03c00250884c465e87eb5747aa502d4f211ec49a3a'
+            'a3689c029d82b5cc448f4793dec97d66d764d3ff010f1d06f9a3fbf397d03f45')
+
+#pkgver() {
+# cd ${pkgname%-*}
+#
+#  hg identify -n | sed 's/+//'
+#}
+#prepare() {
+#  cd ${pkgname%-*}
+#  patch -Np1 -i ../disable-test.patch
+#}
+
+build() {
+  #cd ${pkgname%-*}
+  cd "${srcdir}/SpartanJ-soil2-1da9aa74fba7"
+
+  cp ../premake4.lua . # disables tests and add shared lib target
+
+  premake4 gmake
+  make -C make/linux config='release'
+}
+
+package() {
+  #cd ${pkgname%-*}
+  cd "${srcdir}/SpartanJ-soil2-1da9aa74fba7"
+
+  mkdir -p "${pkgdir}"/usr/include/SOIL2
+  mkdir -p "${pkgdir}"/usr/lib
+
+  cp -dr --no-preserve=ownership lib/linux/* "${pkgdir}"/usr/lib/
+  cp -d --no-preserve=ownership src/SOIL2/SOIL2.h "${pkgdir}"/usr/include/SOIL2/
+}
+
+# vim: ts=2 sw=2 et:
